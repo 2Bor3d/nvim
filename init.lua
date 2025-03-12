@@ -1,6 +1,7 @@
 vim.opt.ignorecase = true
 vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
+vim.opt.shiftwidth=4
 vim.opt.expandtab = true
 vim.opt.cc = "80"
 vim.opt.cursorline = true
