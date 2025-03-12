@@ -18,7 +18,7 @@ vim.opt.splitbelow = true
 --  See `:help 'list'`
 --  and `:help 'listchars'`
 vim.opt.list = true
-vim.opt.listchars = { tab = 'Â» ', trail = 'Â·', nbsp = 'â£' }
+vim.opt.listchars = { tab = ' » ', trail = '·', nbsp = '␣' }
 -- keep corser from edges
 vim.opt.scrolloff = 10
 -- Clear highlights on search when pressing <Esc> in normal mode
