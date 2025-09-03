@@ -204,6 +204,16 @@ require('lazy').setup({
       local luasnip = require 'luasnip'
       luasnip.config.setup {}
 
+      local snippet = luasnip.snippet
+      local text_node = luasnip.text_node
+      local insert_node = luasnip.insert_node
+
+      luasnip.add_snippets("html", {
+        snippet("!", {
+          text_node({"<!DOCTYPE html>", "<html lang=\"en\">", "<head>", "    <meta charset=\"UTF-8\">", "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">", "    <title>"}), insert_node(1, "Document"), text_node({"</title>", "</head>", "<body>", "    "}), insert_node(0), text_node({"", "</body>", "</html>"}),
+        }),
+      })
+
       cmp.setup {
         snippet = {
           expand = function(args)
