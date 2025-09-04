@@ -1,3 +1,13 @@
+-- automatic word wrap
+vim.opt.wrap = true
+vim.opt.linebreak = true
+vim.opt.showbreak = '↪ '
+-- rewrap on resize
+vim.api.nvim_create_autocmd("VimResized", {
+  pattern = "*",
+  command = "wincmd ="
+})
+
 vim.opt.ignorecase = true
 vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
