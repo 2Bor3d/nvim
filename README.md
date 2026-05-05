@@ -1,1 +1,1 @@
-My personal Neovim config. Currently mostly a specced down copy of the kickstart.nvim config with minor additions. 
+My personal Neovim config. Currently pretty bare bones, but I'm working on it ^^
