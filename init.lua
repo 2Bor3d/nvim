@@ -22,4 +22,3 @@ require("config.options")
 -- Plugins
 require("lazy").setup("plugins")
 
-

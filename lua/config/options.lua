@@ -13,7 +13,6 @@ vim.opt.autoindent = true
 
 -- UI
 vim.opt.number = true
-vim.opt.relativenumber = true
 vim.opt.wildmode = "longest,list"
 vim.opt.cc = "80"
 vim.opt.mouse = "a"
@@ -27,6 +26,7 @@ vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
 vim.opt.clipboard = "unnamedplus"
 vim.opt.spell = true
 vim.opt.undofile = true
+vim.opt.updatetime = 300
 
 vim.cmd('filetype plugin on')
 vim.cmd('filetype plugin indent on')
