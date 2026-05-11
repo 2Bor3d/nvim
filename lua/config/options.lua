@@ -26,6 +26,7 @@ vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
 vim.opt.clipboard = "unnamedplus"
 vim.opt.spell = true
 vim.opt.undofile = true
+vim.opt.autoread = true
 vim.opt.updatetime = 300
 
 vim.cmd('filetype plugin on')

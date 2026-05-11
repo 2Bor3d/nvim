@@ -18,6 +18,14 @@ return {
                 section_separators = "",
                 component_separators = "",
             },
+            sections = {
+                lualine_z = {
+                    function()
+                        local opencode = package.loaded.opencode
+                        return opencode and opencode.statusline() or ""
+                    end,
+                },
+            },
         },
     },
     -- Indentation guides
@@ -71,6 +79,29 @@ return {
         },
         config = function()
             require("mason").setup()
+            local capabilities = require("cmp_nvim_lsp").default_capabilities()
+
+            -- Apply completion capabilities to every LSP server.
+            vim.lsp.config("*", {
+                capabilities = capabilities,
+            })
+
+            -- Let ts_ls understand Vue single-file components.
+            vim.lsp.config("ts_ls", {
+                init_options = {
+                    plugins = {
+                        {
+                            name = "@vue/typescript-plugin",
+                            location = require("mason-core.installer.InstallLocation").global():package("vue-language-server")
+                                .. "/node_modules/@vue/language-server/node_modules/@vue/typescript-plugin",
+                            languages = { "javascript", "typescript", "vue" },
+                        },
+                    },
+                },
+                filetypes = { "javascript", "typescript", "vue" },
+            })
+
+            -- Mason installs and enables these servers with vim.lsp.enable().
             require("mason-lspconfig").setup({
                 ensure_installed = {
                     "lua_ls",
@@ -81,42 +112,8 @@ return {
                     "eslint",
                     "texlab",
                 },
+                automatic_enable = true,
             })
-
-            local lspconfig = require("lspconfig")
-            local capabilities = require("cmp_nvim_lsp").default_capabilities()
-
-            -- In Neovim 0.11+, we can set default capabilities globally
-            vim.lsp.config("*", {
-                capabilities = capabilities,
-            })
-
-            lspconfig.lua_ls.setup({})
-            lspconfig.pyright.setup({})
-
-            -- Configure Volar
-            lspconfig.volar.setup({})
-
-            -- Configure ts_ls with Hybrid Mode for Vue
-            lspconfig.ts_ls.setup({
-                init_options = {
-                    plugins = {
-                        {
-                            name = "@vue/typescript-plugin",
-                            location = require("mason-registry").get_package("vue-language-server"):get_install_path()
-                                .. "/node_modules/@vue/language-server/node_modules/@vue/typescript-plugin",
-                            languages = { "javascript", "typescript", "vue" },
-                        },
-                    },
-                },
-                filetypes = { "javascript", "typescript", "vue" },
-            })
-
-            -- Tailwind CSS support
-            lspconfig.tailwindcss.setup({})
-
-            -- Configure LaTex
-            lspconfig.texlab.setup({})
 
             -- Diagnostic configuration
             vim.diagnostic.config({
@@ -236,6 +233,97 @@ return {
             },
         },
     },
+    {
+        "nickjvandyke/opencode.nvim",
+        version = "*", -- Latest stable release
+        dependencies = {
+            {
+                "folke/snacks.nvim",
+                opts = {
+                    input = {},
+                    picker = {
+                        actions = {
+                            opencode_send = function(...) return require("opencode").snacks_picker_send(...) end,
+                        },
+                        win = {
+                            input = {
+                                keys = {
+                                    ["<a-a>"] = { "opencode_send", mode = { "n", "i" } },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        init = function()
+            -- Keep increment/decrement available while opencode owns <C-a>/<C-x>.
+            vim.keymap.set("n", "+", "<C-a>", { desc = "Increment under cursor", noremap = true })
+            vim.keymap.set("n", "-", "<C-x>", { desc = "Decrement under cursor", noremap = true })
+        end,
+        keys = {
+            {
+                "<C-a>",
+                function() require("opencode").ask("@this: ", { submit = true }) end,
+                mode = { "n", "x" },
+                desc = "Ask opencode",
+            },
+            {
+                "<C-x>",
+                function() require("opencode").select() end,
+                mode = { "n", "x" },
+                desc = "Execute opencode action",
+            },
+            {
+                "<C-.>",
+                function() require("opencode").toggle() end,
+                mode = { "n", "t" },
+                desc = "Toggle opencode",
+            },
+            {
+                "go",
+                function() return require("opencode").operator("@this ") end,
+                mode = { "n", "x" },
+                desc = "Add range to opencode",
+                expr = true,
+            },
+            {
+                "goo",
+                function() return require("opencode").operator("@this ") .. "_" end,
+                desc = "Add line to opencode",
+                expr = true,
+            },
+        },
+        config = function()
+            local opencode_cmd = "opencode --port"
+
+            local terminal_opts = {
+                win = {
+                    position = "right",
+                    enter = false,
+                    on_win = function(win)
+                        require("opencode.terminal").setup(win.win)
+                    end,
+                },
+            }
+
+            ---@type opencode.Opts
+            vim.g.opencode_opts = {
+                -- Keep opencode in a consistent snacks-managed side terminal.
+                server = {
+                    start = function()
+                        require("snacks.terminal").open(opencode_cmd, terminal_opts)
+                    end,
+                    stop = function()
+                        require("snacks.terminal").get(opencode_cmd, terminal_opts):close()
+                    end,
+                    toggle = function()
+                        require("snacks.terminal").toggle(opencode_cmd, terminal_opts)
+                    end,
+                },
+            }
+        end,
+    },
     -- Formatting
     {
         "stevearc/conform.nvim",
@@ -248,6 +336,10 @@ return {
                 vue = { "prettier" },
                 css = { "prettier" },
                 html = { "prettier" },
+                lua = { "stylua" },
+                python = { "ruff_format" },
+                tex = { "latexindent" },
+
             },
             format_on_save = { timeout_ms = 500, lsp_fallback = true },
         },
